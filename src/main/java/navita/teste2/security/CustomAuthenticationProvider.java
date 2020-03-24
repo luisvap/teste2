@@ -19,25 +19,33 @@ import navita.teste2.repository.UsuarioRepository;
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    @Autowired
-    private UsuarioRepository userService;
+	@Autowired
+	private UsuarioRepository userService;
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	@Override
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        String email = authentication.getName();
-        String password = authentication.getCredentials().toString();
+		String email = authentication.getName();
+		String password = authentication.getCredentials().toString();
 
-        Optional<Usuario> user = userService.findByEmail(email);
+		Optional<Usuario> user = userService.findByEmailAndSenha(email, password);
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(user.get().getNome())); // description is a string
+		if (user.get() != null) {
+			List<GrantedAuthority> authorities = new ArrayList<>();
+			authorities.add(new SimpleGrantedAuthority(user.get().getEmail())); // description
+																				// is
+																				// a
+																				// string
 
-        return new UsernamePasswordAuthenticationToken(email, password, authorities);
-    }
+			return new UsernamePasswordAuthenticationToken(email, password, authorities);
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
-    }
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public boolean supports(Class<?> authentication) {
+		return authentication.equals(UsernamePasswordAuthenticationToken.class);
+	}
 }
